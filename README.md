@@ -2,6 +2,8 @@
 
 集中することを……強いられているんだ！
 
+for OS X Lion
+
 ## 使い方
 
     $ gem install desperado
