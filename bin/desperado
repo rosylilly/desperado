@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+
+Version = '0.0.1'
+
+def sh(str)
+  `#{str}`
+end
+
+block_hosts = []
+unblock_hosts = []
+
+opt = OptionParser.new
+
+opt.on('-b', '--block HOSTNAME', 'block HOSTNAME') { | host |
+  block_hosts << host
+}
+
+opt.on('-u', '--unblock HOSTNAME', 'unblock HOSTNAME') { | host |
+  unblock_hosts << host
+}
+
+opt.parse!(ARGV)
+
+hosts = open('/etc/hosts', 'r') { | f | f.read }
+
+block_hosts.each do | host |
+  unless hosts.match(/^127\.0\.0\.1\s+#{host}/)
+    hosts << "\n127.0.0.1 #{host}"
+  end
+end
+
+unblock_hosts.each do | host |
+  if m = hosts.match(/^127\.0\.0\.1\s+#{host}$/)
+    hosts.sub!(/^127\.0\.0\.1\s+#{host}\n?/, '')
+  end
+end
+
+open('/etc/hosts', 'w'){|f| f.write(hosts) }
+
+sh("dscacheutil -flushcache")
